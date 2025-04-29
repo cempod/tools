@@ -13,34 +13,15 @@ fi
 
 ACTION=$1
 
-TMP_CFG=$(mktemp /tmp/openocd_cfg.XXXXXX)
 
 case $ACTION in
     unlock)
         echo "Unlocking..."
-        cat > $TMP_CFG <<EOF
-source [find interface/stlink.cfg]
-transport select hla_swd
-source [find target/stm32f1x.cfg]
-init
-reset halt
-stm32f1x unlock 0
-reset halt
-exit
-EOF
+        openocd -f interface/stlink-v2.cfg -f target/stm32f1x.cfg -c "init" -c "reset halt" -c "stm32f1x unlock 0" -c "exit"
         ;;
     lock)
         echo "Locking..."
-        cat > $TMP_CFG <<EOF
-source [find interface/stlink.cfg]
-transport select hla_swd
-source [find target/stm32f1x.cfg]
-init
-reset halt
-stm32f1x lock 0
-reset halt
-exit
-EOF
+        openocd -f interface/stlink-v2.cfg -f target/stm32f1x.cfg -c "init" -c "reset halt" -c "stm32f1x lock 0" -c "exit"
         ;;
     *)
         echo "Unknown command: $ACTION"
@@ -49,10 +30,5 @@ EOF
         ;;
 
 esac
-
-echo "Starting openocd..."
-openocd -f $TMP_CFG
-
-rm $TMP_CFG
 
 echo "Done"
